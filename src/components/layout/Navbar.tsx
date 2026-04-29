@@ -159,7 +159,6 @@ export function Navbar() {
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       {category.name}
-                      <Globe className="w-4 h-4 text-emerald-500" />
                     </Link>
                   </motion.div>
                 ))}
