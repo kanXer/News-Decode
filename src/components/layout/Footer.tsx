@@ -21,11 +21,11 @@ function Footer() {
                 <Globe className="w-6 h-6" />
               </div>
               <span className="text-2xl font-black tracking-tighter italic text-white">
-                KHABRI<span className="text-emerald-500 not-italic">.IN</span>
+                NEWS<span className="text-emerald-500 not-italic">DECODE</span>
               </span>
             </Link>
             <p className="text-gray-400 text-sm leading-relaxed font-medium">
-              KhabriIn is a high-end, AI-powered global news platform delivering real-time updates and deep insights across Tech, Business, and Security.
+             News Decode is a high-end, AI-powered global news platform delivering real-time updates and deep insights across Tech, Business, and Security.
             </p>
           </div>
 
