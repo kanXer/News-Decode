@@ -71,7 +71,7 @@ export function Navbar() {
               </div>
             </div>
             <span className="text-xl md:text-2xl lg:text-3xl font-black tracking-tighter italic">
-              KHABRI<span className="text-emerald-500 dark:text-[#10b981] not-italic">.IN</span>
+              NEWS <span className="text-emerald-500 dark:text-[#10b981] not-italic">DECODE</span>
             </span>
           </Link>
 
