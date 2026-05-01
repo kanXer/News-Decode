@@ -76,7 +76,18 @@ export async function GET() {
 
   for (const article of news) {
     const slug = article.slug || article.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || `news-${article._id}`;
-    const lastmod = article.created_at ? new Date(article.created_at).toISOString() : new Date().toISOString();
+    
+    let lastmod: string;
+    if (!article.created_at) {
+      lastmod = new Date().toISOString();
+    } else if (typeof article.created_at === 'number') {
+      lastmod = new Date(article.created_at).toISOString();
+    } else if (article.created_at instanceof Date) {
+      lastmod = article.created_at.toISOString();
+    } else {
+      lastmod = new Date(article.created_at).toISOString();
+    }
+    
     sitemap += `
   <url>
     <loc>${baseUrl}/news/${slug}</loc>
