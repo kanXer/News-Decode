@@ -7,6 +7,7 @@ export async function GET() {
   let news: any[] = [];
   let fromDb = false;
 
+  // 1. Fetch data from MongoDB
   try {
     const client = await clientPromise;
     const db = client.db("news_db");
@@ -21,18 +22,17 @@ export async function GET() {
     console.error('DB error, falling back to file:', error);
   }
 
+  // 2. Fallback to Local JSON Files
   if (!fromDb || news.length === 0) {
     try {
       const dataPath = path.join(process.cwd(), '..', 'news', 'processed.json');
-      if (fs.existsSync(dataPath)) {
-        const fileContents = fs.readFileSync(dataPath, 'utf8');
+      const processedPath = path.join(process.cwd(), '..', 'news', 'state.json');
+      
+      let filePath = fs.existsSync(dataPath) ? dataPath : (fs.existsSync(processedPath) ? processedPath : null);
+
+      if (filePath) {
+        const fileContents = fs.readFileSync(filePath, 'utf8');
         news = JSON.parse(fileContents);
-      } else {
-        const processedPath = path.join(process.cwd(), '..', 'news', 'state.json');
-        if (fs.existsSync(processedPath)) {
-          const fileContents = fs.readFileSync(processedPath, 'utf8');
-          news = JSON.parse(fileContents);
-        }
       }
     } catch (fileError) {
       console.error('File fallback error:', fileError);
@@ -41,6 +41,7 @@ export async function GET() {
 
   const baseUrl = 'https://news.fastpdftool.xyz';
 
+  // 3. Sitemap Header
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -74,18 +75,30 @@ export async function GET() {
     <changefreq>monthly</changefreq>
   </url>`;
 
+  // 4. Dynamic News URLs
   for (const article of news) {
     const slug = article.slug || article.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') || `news-${article._id}`;
     
     let lastmod: string;
-    if (!article.created_at) {
+    const rawDate = article.created_at;
+
+    if (!rawDate) {
       lastmod = new Date().toISOString();
-    } else if (typeof article.created_at === 'number') {
-      lastmod = new Date(article.created_at).toISOString();
-    } else if (article.created_at instanceof Date) {
-      lastmod = article.created_at.toISOString();
     } else {
-      lastmod = new Date(article.created_at).toISOString();
+      try {
+        let dateObj: Date;
+        if (typeof rawDate === 'number') {
+          // Fix for 1970 issue: Detect if timestamp is in seconds (10 digits) or milliseconds
+          const timestamp = rawDate < 10000000000 ? rawDate * 1000 : rawDate;
+          dateObj = new Date(timestamp);
+        } else {
+          dateObj = new Date(rawDate);
+        }
+        // Final validation
+        lastmod = isNaN(dateObj.getTime()) ? new Date().toISOString() : dateObj.toISOString();
+      } catch (e) {
+        lastmod = new Date().toISOString();
+      }
     }
     
     sitemap += `
@@ -100,9 +113,11 @@ export async function GET() {
   sitemap += `
 </urlset>`;
 
+  // 5. Return Response with proper headers
   return new NextResponse(sitemap, {
     headers: {
       'Content-Type': 'application/xml',
+      'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=59',
     },
   });
 }
