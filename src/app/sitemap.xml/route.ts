@@ -23,12 +23,12 @@ export async function GET() {
 
   if (!fromDb || news.length === 0) {
     try {
-      const dataPath = path.join(process.cwd(), '..', 'api', 'local_news.json');
+      const dataPath = path.join(process.cwd(), '..', 'news', 'processed.json');
       if (fs.existsSync(dataPath)) {
         const fileContents = fs.readFileSync(dataPath, 'utf8');
         news = JSON.parse(fileContents);
       } else {
-        const processedPath = path.join(process.cwd(), '..', 'api', 'processed.json');
+        const processedPath = path.join(process.cwd(), '..', 'news', 'state.json');
         if (fs.existsSync(processedPath)) {
           const fileContents = fs.readFileSync(processedPath, 'utf8');
           news = JSON.parse(fileContents);
