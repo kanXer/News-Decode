@@ -1,0 +1,5 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://news.fastpdftool.xyz/sitemap.xml
